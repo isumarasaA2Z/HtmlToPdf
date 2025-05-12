@@ -11,6 +11,7 @@ namespace General.Entities
     {
         [JsonProperty("name")]
         public string Name { get; set; }
+
         [JsonProperty("Value")]
         public string value { get; set; }
     }

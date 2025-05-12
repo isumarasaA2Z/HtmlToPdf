@@ -1,16 +1,28 @@
 using HtmlToPdf.api.Core.DependencyInjections;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Net.Http.Headers; // Added for HeaderNames
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+const string ToAllowSpecificOrigins = "_allowSpecificOrigins"; // Added constant
+
+builder.Services.AddAppConfiguration(builder.Configuration).AddDataServices();
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(name: ToAllowSpecificOrigins,
+                      builder =>
+                      {
+                          builder.AllowAnyOrigin()
+                                 .AllowAnyMethod()
+                                 .WithHeaders(HeaderNames.ContentType, "ApimSubscriptionKey");
+                      });
+});
 
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-var configuration = builder.Configuration;
-builder.Services.AddAppConfiguration(configuration).AddDataServices();
 
 var app = builder.Build();
 
@@ -22,6 +34,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseCors(ToAllowSpecificOrigins); // Added to apply CORS policy
 
 app.UseAuthorization();
 

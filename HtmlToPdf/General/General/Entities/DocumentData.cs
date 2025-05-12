@@ -11,10 +11,13 @@ namespace General.Entities
     {
         [JsonProperty("includePageNumber")]
         public bool IncludePageNumber { get; set; }
+
         [JsonProperty("pageSetup")]
         public PageSetup? PageSetup { get; set; }
+
         [JsonProperty("texts")]
         public List<Text>? Texts { get; set; }
+
         [JsonProperty("images")]
         public List<Table>? Tables { get; set; }
     }

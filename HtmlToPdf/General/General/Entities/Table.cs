@@ -11,18 +11,25 @@ namespace General.Entities
     {
         [JsonProperty("name")]
         public string? Name { get; set; }
+
         [JsonProperty("tableMetaData")]
         public string? TableMetaData { get; set; }
+
         [JsonProperty("headerRowMetaData")]
         public string? HeaderRowMetaData { get; set; }
+
         [JsonProperty("headerCellMetaData")]
         public string? HeaderCellMetaData { get; set; }
+
         [JsonProperty("dataRowMetaData")]
         public string? RowMetaData { get; set; }
+
         [JsonProperty("dataCellMetaData")]
         public string? CellMetaData { get; set; }
+
         [JsonProperty("headers")]
         public List<string>? headers { get; set; }
+
         [JsonProperty("rows")]
         public List<Row>? rows { get; set; }
     }

@@ -12,6 +12,7 @@ namespace General.Entities
     {
         [JsonProperty("headerMargin")]
         public Margin? HeaderMargin { get; set; }
+
         [JsonProperty("footerMargin")]
         public Margin? FooterMargin { get; set; }
 
