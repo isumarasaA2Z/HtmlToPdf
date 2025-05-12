@@ -1,6 +1,7 @@
 ﻿using General.Entities;
 using HtmlToPdf.core.Entities;
 using HtmlToPdf.core.Interfaces;
+using PuppeteerSharp;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,7 +19,6 @@ namespace HtmlToPdf.core
             _transformHelper = transformHelper
                                       ?? throw new ArgumentNullException(nameof(transformHelper));
         }
-
         public Task<ReturnResponse> GetConvertedHtml(ReportData document)
         {
             throw new NotImplementedException();
@@ -84,7 +84,7 @@ namespace HtmlToPdf.core
 </html>";
             mainHtml = _transformHelper.ReplaceTexts(report, mainHtml);
             mainHtml = _transformHelper.ReplaceTables(report, mainHtml);
-            byte[] file = await _transformHelper.ConvertHtmlToPdf(mainHtml, report, headerHtml, footerHtml);
+            byte[] file = await _transformHelper.ConvertHtmlToPdfAsync(mainHtml, report, headerHtml, footerHtml);
             returnResponse.OutputPdf = file;
             returnResponse.OperationSuccess = true;
             return returnResponse;

@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 
 namespace General.Entities
 {
-
     public class PageMargin
     {
         [JsonProperty("headerMargin")]
@@ -15,6 +14,5 @@ namespace General.Entities
 
         [JsonProperty("footerMargin")]
         public Margin? FooterMargin { get; set; }
-
     }
 }

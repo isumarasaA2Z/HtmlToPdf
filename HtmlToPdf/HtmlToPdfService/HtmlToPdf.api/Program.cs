@@ -5,16 +5,20 @@ using Microsoft.Net.Http.Headers; // Added for HeaderNames
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+
 const string ToAllowSpecificOrigins = "_allowSpecificOrigins"; // Added constant
 
-builder.Services.AddAppConfiguration(builder.Configuration).AddDataServices();
+// Chained IServiceCollection Services
+builder.Services
+    .AddAppConfiguration(builder.Configuration)
+    .AddDataServices();
 
 builder.Services.AddCors(options =>
 {
     options.AddPolicy(name: ToAllowSpecificOrigins,
-                      builder =>
+                      policyBuilder =>
                       {
-                          builder.AllowAnyOrigin()
+                          policyBuilder.AllowAnyOrigin()
                                  .AllowAnyMethod()
                                  .WithHeaders(HeaderNames.ContentType, "ApimSubscriptionKey");
                       });
