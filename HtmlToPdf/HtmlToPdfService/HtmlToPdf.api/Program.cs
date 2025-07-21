@@ -1,6 +1,10 @@
 using HtmlToPdf.api.Core.DependencyInjections;
+using HtmlToPdf.core.Helpers;
+using HtmlToPdf.core.Interfaces;
+using HtmlToPdf.core;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Net.Http.Headers; // Added for HeaderNames
+using Microsoft.Net.Http.Headers;
+using PuppeteerSharp; // Added for HeaderNames
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,6 +16,10 @@ const string ToAllowSpecificOrigins = "_allowSpecificOrigins"; // Added constant
 builder.Services
     .AddAppConfiguration(builder.Configuration)
     .AddDataServices();
+
+
+builder.Services.AddSingleton<ITransformHelper, TransformHelper>();
+builder.Services.AddSingleton<IHtmlToPdfService, HtmlToPdfService>();
 
 builder.Services.AddCors(options =>
 {
