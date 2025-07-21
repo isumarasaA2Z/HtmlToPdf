@@ -133,10 +133,10 @@ namespace HtmlToPdf.core.Helpers
                 Console.WriteLine("[DEBUG] Setting up PDF margins...");
                 var margins = new MarginOptions
                 {
-                    Top = report.ReportData.PageSetup.PageMargin.HeaderMargin,
-                    Bottom = report.ReportData.PageSetup.PageMargin.FooterMargin,
-                    Left = report.ReportData.PageSetup.PageMargin.HeaderMargin,
-                    Right = report.ReportData.PageSetup.PageMargin.FooterMargin
+                    Top = $"{report.ReportData.PageSetup.PageMargin.HeaderMargin}mm",
+                    Bottom = $"{report.ReportData.PageSetup.PageMargin.FooterMargin}mm",
+                    Left = $"{report.ReportData.PageSetup.PageMargin.HeaderMargin}mm",
+                    Right = $"{report.ReportData.PageSetup.PageMargin.FooterMargin}mm"
                 };
 
                 Console.WriteLine("[DEBUG] Generating PDF from HTML...");
