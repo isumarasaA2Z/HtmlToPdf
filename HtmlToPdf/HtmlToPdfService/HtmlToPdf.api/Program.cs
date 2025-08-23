@@ -26,9 +26,10 @@ builder.Services.AddCors(options =>
     options.AddPolicy(name: ToAllowSpecificOrigins,
                       policyBuilder =>
                       {
-                          policyBuilder.AllowAnyOrigin()
+                          policyBuilder.WithOrigins("http://localhost:5173")
                                  .AllowAnyMethod()
-                                 .WithHeaders(HeaderNames.ContentType, "ApimSubscriptionKey");
+                                 .AllowAnyHeader()
+                                 .AllowCredentials();
                       });
 });
 

@@ -21,4 +21,10 @@
     <Folder Include="Font\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <!-- Exclude chromium files from being copied to output directory -->
+    <Content Remove="chromium\**" />
+    <None Remove="chromium\**" />
+  </ItemGroup>
+
 </Project>

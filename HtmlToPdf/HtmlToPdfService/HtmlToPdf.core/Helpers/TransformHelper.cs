@@ -6,14 +6,20 @@ using PuppeteerSharp.Media;
 using System.Net;
 using System.Net.Http;
 using System.Runtime.InteropServices;
-using System.Runtime.InteropServices;
 
 namespace HtmlToPdf.core.Helpers
 {
     public class TransformHelper : ITransformHelper
     {
-        public string ReplaceTables(Report report, string htmlTemplate)
+        public string ReplaceTables(Report? report, string htmlTemplate)
         {
+            // Add null checks to prevent exceptions
+            if (report?.ReportData?.Tables == null)
+            {
+                Console.WriteLine("[DEBUG] No tables found or report data is null");
+                return htmlTemplate;
+            }
+
             foreach (var tableItem in report.ReportData.Tables)
             {
                 string tableName = $"{Properties.Resources.TablePrefix}{tableItem.Name}{Properties.Resources.GeneralPostfix}";
@@ -22,24 +28,33 @@ namespace HtmlToPdf.core.Helpers
                 {
                     string table = $"<table {tableItem.TableMetaData}> <thead> <tr {tableItem.HeaderRowMetaData}>";
 
-                    foreach (var headerItem in tableItem.headers)
+                    // Add null check for headers
+                    if (tableItem.headers != null)
                     {
-                        string header = $"<th {tableItem.HeaderCellMetaData}>{headerItem}</th>";
-                        table += header;
+                        foreach (var headerItem in tableItem.headers)
+                        {
+                            string header = $"<th {tableItem.HeaderCellMetaData}>{headerItem}</th>";
+                            table += header;
+                        }
                     }
 
                     table += @"</tr> </thead>";
-                    foreach (var rowItem in tableItem.rows)
+                    
+                    // Add null check for rows
+                    if (tableItem.rows != null)
                     {
-                        table += $"<tr {tableItem.RowMetaData}>";
-
-                        foreach (var columnItem in rowItem.Columns)
+                        foreach (var rowItem in tableItem.rows)
                         {
-                            string column = $"<td {tableItem.CellMetaData}>{columnItem}</td>";
-                            table += column;
-                        }
+                            table += $"<tr {tableItem.RowMetaData}>";
 
-                        table += @"</tr>";
+                            foreach (var columnItem in rowItem.Columns)
+                            {
+                                string column = $"<td {tableItem.CellMetaData}>{columnItem}</td>";
+                                table += column;
+                            }
+
+                            table += @"</tr>";
+                        }
                     }
 
                     table += @"</table>";
@@ -49,8 +64,14 @@ namespace HtmlToPdf.core.Helpers
 
             return htmlTemplate;
         }
-        public string ReplaceTexts(Report report, string htmlTemplate)
+        public string ReplaceTexts(Report? report, string htmlTemplate)
         {
+            // Add null checks to prevent exceptions
+            if (report?.ReportData?.Texts == null)
+            {
+                Console.WriteLine("[DEBUG] No texts found or report data is null");
+                return htmlTemplate;
+            }
 
             foreach (var item in report.ReportData.Texts)
             {
@@ -131,19 +152,16 @@ namespace HtmlToPdf.core.Helpers
             try
             {
                 Console.WriteLine("[DEBUG] Setting up PDF margins...");
-                var margins = new MarginOptions
-                {
-                    Top = $"{report.ReportData.PageSetup.PageMargin.HeaderMargin}mm",
-                    Bottom = $"{report.ReportData.PageSetup.PageMargin.FooterMargin}mm",
-                    Left = $"{report.ReportData.PageSetup.PageMargin.HeaderMargin}mm",
-                    Right = $"{report.ReportData.PageSetup.PageMargin.FooterMargin}mm"
-                };
+                var margins = BuildCustomMargins(report.ReportData?.PageSetup?.PageMargin);
+
+                Console.WriteLine("[DEBUG] Applying custom fonts to HTML content...");
+                var enhancedHtml = ApplyCustomFontsToHtml(htmlReport, report.ReportData?.PageSetup?.FontFamily ?? "Arial");
 
                 Console.WriteLine("[DEBUG] Generating PDF from HTML...");
                 var pdfBytes = await GeneratePdfFromHtmlAsync(
-                    htmlContent: htmlReport,
+                    htmlContent: enhancedHtml,
                     margins: margins,
-                    pageSetup: report.ReportData.PageSetup,
+                    pageSetup: report.ReportData?.PageSetup ?? new PageSetup(),
                     header: header,
                     footer: footer,
                     cancellationToken: cancellationToken);
@@ -195,13 +213,20 @@ namespace HtmlToPdf.core.Helpers
             Console.WriteLine("[DEBUG] Configuring PDF options...");
             var pdfOptions = new PdfOptions
             {
-                Format = PaperFormat.A4,
+                Format = GetCustomPageSize(pageSetup?.Size),
                 PrintBackground = true,
                 MarginOptions = margins,
                 DisplayHeaderFooter = true,
                 HeaderTemplate = BuildHeaderTemplate(header, pageSetup),
                 FooterTemplate = BuildFooterTemplate(footer, pageSetup)
             };
+
+            // Apply orientation if specified
+            if (!string.IsNullOrWhiteSpace(pageSetup?.Orientation))
+            {
+                Console.WriteLine($"[DEBUG] Setting page orientation: {pageSetup.Orientation}");
+                pdfOptions.Landscape = pageSetup.Orientation.Equals("landscape", StringComparison.OrdinalIgnoreCase);
+            }
 
             Console.WriteLine("[DEBUG] Generating PDF...");
             var result = await page.PdfDataAsync(pdfOptions).ConfigureAwait(false);
@@ -210,27 +235,155 @@ namespace HtmlToPdf.core.Helpers
             return result;
         }
 
-        private static string BuildHeaderTemplate(string headerText, PageSetup pageSetup)
+        private MarginOptions BuildCustomMargins(PageMargin? pageMargin)
         {
+            Console.WriteLine("[DEBUG] Building custom margins from PageMargin settings");
+            
+            if (pageMargin?.HeaderMargin == null || pageMargin?.FooterMargin == null)
+            {
+                Console.WriteLine("[DEBUG] Using default margins (20mm all sides)");
+                return new MarginOptions
+                {
+                    Top = "20mm",
+                    Bottom = "20mm",
+                    Left = "20mm",
+                    Right = "20mm"
+                };
+            }
+
+            var margins = new MarginOptions
+            {
+                Top = $"{pageMargin.HeaderMargin.Height}mm",
+                Bottom = $"{pageMargin.FooterMargin.Height}mm",
+                Left = $"{pageMargin.HeaderMargin.Left}mm",
+                Right = $"{pageMargin.HeaderMargin.Right}mm"
+            };
+
+            Console.WriteLine($"[DEBUG] Custom margins - Top: {margins.Top}, Bottom: {margins.Bottom}, Left: {margins.Left}, Right: {margins.Right}");
+            return margins;
+        }
+
+        private string ApplyCustomFontsToHtml(string htmlContent, string fontFamily)
+        {
+            Console.WriteLine($"[DEBUG] Applying custom font family: {fontFamily}");
+            
+            if (string.IsNullOrWhiteSpace(fontFamily))
+            {
+                Console.WriteLine("[DEBUG] No custom font specified, using default");
+                return htmlContent;
+            }
+
+            // Check if HTML already has a style tag
+            if (htmlContent.Contains("<style>"))
+            {
+                // Insert font-family into existing body style
+                var bodyStylePattern = @"body\s*\{([^}]*)font-family:\s*[^;]+;([^}]*)\}";
+                var bodyStyleReplacement = $"body {{$1font-family: {fontFamily}, sans-serif;$2}}";
+                
+                if (System.Text.RegularExpressions.Regex.IsMatch(htmlContent, bodyStylePattern))
+                {
+                    htmlContent = System.Text.RegularExpressions.Regex.Replace(htmlContent, bodyStylePattern, bodyStyleReplacement);
+                }
+                else
+                {
+                    // Add font-family to existing body style
+                    var existingBodyPattern = @"body\s*\{([^}]*)\}";
+                    var existingBodyReplacement = $"body {{$1 font-family: {fontFamily}, sans-serif;}}";
+                    htmlContent = System.Text.RegularExpressions.Regex.Replace(htmlContent, existingBodyPattern, existingBodyReplacement);
+                }
+            }
+            else
+            {
+                // Add a new style tag with font-family
+                var headEndIndex = htmlContent.IndexOf("</head>", StringComparison.OrdinalIgnoreCase);
+                if (headEndIndex != -1)
+                {
+                    var fontStyle = $"\n    <style>\n        body {{ font-family: {fontFamily}, sans-serif; }}\n    </style>\n";
+                    htmlContent = htmlContent.Insert(headEndIndex, fontStyle);
+                }
+            }
+
+            Console.WriteLine("[DEBUG] Custom font applied to HTML content");
+            return htmlContent;
+        }
+
+        private PaperFormat GetCustomPageSize(string? size)
+        {
+            Console.WriteLine($"[DEBUG] Converting page size: {size}");
+            
+            if (string.IsNullOrWhiteSpace(size))
+            {
+                Console.WriteLine("[DEBUG] No page size specified, using A4");
+                return PaperFormat.A4;
+            }
+
+            return size.ToUpperInvariant() switch
+            {
+                "A3" => PaperFormat.A3,
+                "A4" => PaperFormat.A4,
+                "A5" => PaperFormat.A5,
+                "LETTER" => PaperFormat.Letter,
+                "LEGAL" => PaperFormat.Legal,
+                "TABLOID" => PaperFormat.Tabloid,
+                "LEDGER" => PaperFormat.Ledger,
+                _ => PaperFormat.A4
+            };
+        }
+
+        private static string BuildHeaderTemplate(string headerText, PageSetup? pageSetup)
+        {
+            Console.WriteLine("[DEBUG] Building custom header template");
+            
+            // Use HeaderText configuration if available, otherwise use headerText parameter
+            var headerConfig = pageSetup?.HeaderText;
+            var displayText = !string.IsNullOrWhiteSpace(headerConfig?.Text) ? headerConfig.Text : headerText;
+            var fontFamily = !string.IsNullOrWhiteSpace(headerConfig?.Font) ? headerConfig.Font : pageSetup?.FontFamily ?? "Arial";
+            var fontSize = headerConfig?.FontSize > 0 ? headerConfig.FontSize : 10;
+            var alignment = GetTextAlignment(headerConfig?.Alignment);
+
             return $@"
-                    <div style='font-family: {pageSetup.FontFamily}, sans-serif; font-size: 10px; width: 100%; padding: 10px 20px; box-sizing: border-box;'>
-                        <div style='display: flex; justify-content: space-between; align-items: center;'>
-                            <div style='font-weight: bold;'>{WebUtility.HtmlEncode(headerText)}</div>
-                            <div></div>
+                    <div style='font-family: {fontFamily}, sans-serif; font-size: {fontSize}px; width: 100%; padding: 10px 20px; box-sizing: border-box;'>
+                        <div style='display: flex; justify-content: {alignment}; align-items: center;'>
+                            <div style='font-weight: bold;'>{WebUtility.HtmlEncode(displayText ?? "")}</div>
                         </div>
                     </div>";
         }
 
-        private static string BuildFooterTemplate(string footerText, PageSetup pageSetup)
+        private static string BuildFooterTemplate(string footerText, PageSetup? pageSetup)
         {
+            Console.WriteLine("[DEBUG] Building custom footer template");
+            
+            // Use FooterText configuration if available, otherwise use footerText parameter
+            var footerConfig = pageSetup?.FooterText;
+            var displayText = !string.IsNullOrWhiteSpace(footerConfig?.Text) ? footerConfig.Text : footerText;
+            var fontFamily = !string.IsNullOrWhiteSpace(footerConfig?.Font) ? footerConfig.Font : pageSetup?.FontFamily ?? "Arial";
+            var fontSize = footerConfig?.FontSize > 0 ? footerConfig.FontSize : 10;
+            var alignment = GetTextAlignment(footerConfig?.Alignment);
+
             return $@"
-                    <div style='font-family: {pageSetup.FontFamily}, sans-serif; font-size: 10px; width: 100%; padding: 10px 20px; box-sizing: border-box;'>
-                        <div style='display: flex; justify-content: space-between; align-items: center;'>
-                            <div>{WebUtility.HtmlEncode(footerText)}</div>
-                            <div>Date: {DateTime.UtcNow:yyyy-MM-dd}</div>
-                            <div>Page <span class='pageNumber'></span> of <span class='totalPages'></span></div>
+                    <div style='font-family: {fontFamily}, sans-serif; font-size: {fontSize}px; width: 100%; padding: 10px 20px; box-sizing: border-box;'>
+                        <div style='display: flex; justify-content: {alignment}; align-items: center;'>
+                            <div>{WebUtility.HtmlEncode(displayText ?? "")}</div>
+                            <div style='margin-left: auto; display: flex; gap: 20px;'>
+                                <span>Date: {DateTime.UtcNow:yyyy-MM-dd}</span>
+                                <span>Page <span class='pageNumber'></span> of <span class='totalPages'></span></span>
+                            </div>
                         </div>
                     </div>";
+        }
+
+        private static string GetTextAlignment(string? alignment)
+        {
+            if (string.IsNullOrWhiteSpace(alignment))
+                return "space-between";
+
+            return alignment.ToLowerInvariant() switch
+            {
+                "left" => "flex-start",
+                "center" => "center",
+                "right" => "flex-end",
+                _ => "space-between"
+            };
         }
 
         // Custom exception for better error handling
