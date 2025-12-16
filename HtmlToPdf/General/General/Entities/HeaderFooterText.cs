@@ -10,12 +10,12 @@ namespace General.Entities
     public class HeaderFooterText
     {
         [JsonProperty("text")]
-        public string Text { get; set; }
+        public string? Text { get; set; }
         [JsonProperty("font")]
-        public string Font { get; set; }
+        public string? Font { get; set; }
         [JsonProperty("fontSize")]
-        public int FontSize { get; set; }
+        public int? FontSize { get; set; }
         [JsonProperty("alignment")]
-        public string Alignment { get; set; }
+        public string? Alignment { get; set; }
     }
 }

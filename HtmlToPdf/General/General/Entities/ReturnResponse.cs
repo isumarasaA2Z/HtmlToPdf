@@ -13,6 +13,7 @@ namespace General.Entities
 #pragma warning disable CA1056 // URI-like properties should not be strings
         public byte[] OutputPdf { get; set; }
 #pragma warning restore CA1056 // URI-like properties should not be strings
+        public string ConvertedHtml { get; set; }
         public bool OperationSuccess { get; set; }
         public string ResponseMessage { get; set; }
         public string ExceptionMessage { get; set; }

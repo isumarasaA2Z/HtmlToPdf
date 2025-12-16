@@ -12,21 +12,49 @@ namespace HtmlToPdf.core
     public class HtmlToPdfService : IHtmlToPdfService
     {
         private readonly ITransformHelper? _transformHelper;
+        private readonly ITemplateLoader? _templateLoader;
 
-        public HtmlToPdfService(ITransformHelper transformHelper)
+        public HtmlToPdfService(ITransformHelper transformHelper, ITemplateLoader templateLoader)
         {
             _transformHelper = transformHelper
                                       ?? throw new ArgumentNullException(nameof(transformHelper));
+            _templateLoader = templateLoader
+                                      ?? throw new ArgumentNullException(nameof(templateLoader));
         }
 
-        public Task<ReturnResponse> GetConvertedHtml(ReportData document)
+        public async Task<ReturnResponse> GetConvertedHtml(ReportData document)
         {
-            throw new NotImplementedException();
+            var report = new Report
+            {
+                ReportData = document
+            };
+            return await GetConvertedHtml(report);
         }
 
-        public Task<ReturnResponse> GetConvertedHtml(Report report)
+        public async Task<ReturnResponse> GetConvertedHtml(Report report)
         {
-            throw new NotImplementedException();
+            try
+            {
+                var returnResponse = new ReturnResponse();
+                string htmlTemplate = await _templateLoader.LoadTemplateAsync(report.TemplateName);
+
+                string convertedHtml = _transformHelper.ReplaceTexts(report, htmlTemplate);
+                convertedHtml = _transformHelper.ReplaceTables(report, convertedHtml);
+                convertedHtml = _transformHelper.ReplaceImages(report, convertedHtml);
+
+                returnResponse.ConvertedHtml = convertedHtml;
+                returnResponse.OperationSuccess = true;
+
+                return returnResponse;
+            }
+            catch (Exception ex)
+            {
+                return new ReturnResponse
+                {
+                    OperationSuccess = false,
+                    ExceptionMessage = $"Error converting to HTML: {ex.Message}"
+                };
+            }
         }
 
         public async Task<string> GetConvertedHtmlAsync(ReportData document)
@@ -39,55 +67,73 @@ namespace HtmlToPdf.core
 
         public async Task<ReturnResponse> GetConvertedHtmltoPdf(Report report)
         {
-            ReturnResponse returnResponse = new ReturnResponse();
-            string convertedHtml = string.Empty;
-            string headerHtml = string.Empty;
-            string footerHtml = string.Empty;
-            string mainHtml = @"
-<!DOCTYPE html>
-<html lang=\""en\"">
-<head>
-    <meta charset=\""UTF-8\"">
-    <meta name=\""viewport\"" content=\""width=device-width, initial-scale=1.0\"">
-    <title>Purchase Order Quotation</title>
-    <style>
-        body { font-family: Arial, sans-serif; margin: 20px; }
-        h1 { text-align: center; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-        th { background-color: #f4f4f4; }
-    </style>
-</head>
-<body>
-    <h1>Purchase Order Quotation</h1>
-    <p>This Purchase Order <strong>#{text.orderNO}#</strong> contains the following data:</p>
-    
-    <table>
-        <tr>
-            <th>Order No</th>
-            <th>Line No</th>
-            <th>Part No</th>
-            <th>Quantity</th>
-        </tr>
-        #{table.Order}#
-    </table>
-    
-    <h2>Delivery Locations:</h2>
-    <ul>
-        <li>No: 5, Jayamalapauara, Gampola</li>
-        <li>No: 10 Kandy Road, Peradeniya</li>
-        <li>No: 55 KCC, Kandy</li>
-    </ul>
+            try
+            {
+                if (report == null)
+                {
+                    throw new ArgumentNullException(nameof(report), "Report cannot be null");
+                }
 
-    <p>Order Reference: <strong>#{text.orderno1}#</strong></p>
-</body>
-</html>";
-            mainHtml = _transformHelper.ReplaceTexts(report, mainHtml);
-            mainHtml = _transformHelper.ReplaceTables(report, mainHtml);
-            byte[] file = await _transformHelper.ConvertHtmlToPdf(mainHtml, report, headerHtml, footerHtml);
-            returnResponse.OutputPdf = file;
-            returnResponse.OperationSuccess = true;
-            return returnResponse;
+                if (report.ReportData == null)
+                {
+                    throw new ArgumentNullException(nameof(report.ReportData), "Report data cannot be null");
+                }
+
+                var returnResponse = new ReturnResponse();
+                string headerHtml = GenerateHeaderHtml(report.ReportData.PageSetup?.HeaderText?.Text);
+                string footerHtml = GenerateFooterHtml(report.ReportData.PageSetup?.FooterText?.Text);
+                string mainHtml = await _templateLoader.LoadTemplateAsync(report.TemplateName);
+
+                mainHtml = _transformHelper.ReplaceTexts(report, mainHtml);
+                mainHtml = _transformHelper.ReplaceTables(report, mainHtml);
+                mainHtml = _transformHelper.ReplaceImages(report, mainHtml);
+
+                byte[] pdfBytes = await _transformHelper.ConvertHtmlToPdf(mainHtml, report, headerHtml, footerHtml);
+
+                returnResponse.OutputPdf = pdfBytes;
+                returnResponse.OperationSuccess = true;
+                returnResponse.RequestId = report.RequestId;
+
+                return returnResponse;
+            }
+            catch (Exception ex)
+            {
+                return new ReturnResponse
+                {
+                    OperationSuccess = false,
+                    ExceptionMessage = $"Error converting HTML to PDF: {ex.Message}",
+                    RequestId = report?.RequestId
+                };
+            }
+        }
+
+        private string GenerateHeaderHtml(string headerText)
+        {
+            if (string.IsNullOrEmpty(headerText))
+            {
+                return string.Empty;
+            }
+
+            return $@"
+<div style='font-size: 10px; text-align: center; width: 100%;'>
+    {headerText}
+</div>";
+        }
+
+        private string GenerateFooterHtml(string footerText)
+        {
+            if (string.IsNullOrEmpty(footerText))
+            {
+                return @"
+<div style='font-size: 10px; text-align: center; width: 100%;'>
+    <span class='pageNumber'></span> / <span class='totalPages'></span>
+</div>";
+            }
+
+            return $@"
+<div style='font-size: 10px; text-align: center; width: 100%;'>
+    {footerText} | Page <span class='pageNumber'></span> / <span class='totalPages'></span>
+</div>";
         }
     }
 }

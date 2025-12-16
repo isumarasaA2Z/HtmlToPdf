@@ -12,6 +12,7 @@ namespace HtmlToPdf.core.Interfaces
     {
         string ReplaceTexts(Report report, string htmlTemplate);
         string ReplaceTables(Report report, string htmlTemplate);
+        string ReplaceImages(Report report, string htmlTemplate);
         Task<byte[]> ConvertHtmlToPdf(string htmlReport, Report report, string header, string footer);
     }
 }

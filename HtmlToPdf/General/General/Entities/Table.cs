@@ -17,9 +17,9 @@ namespace General.Entities
         public string? HeaderRowMetaData { get; set; }
         [JsonProperty("headerCellMetaData")]
         public string? HeaderCellMetaData { get; set; }
-        [JsonProperty("dataRowMetaData")]
+        [JsonProperty("rowMetaData")]
         public string? RowMetaData { get; set; }
-        [JsonProperty("dataCellMetaData")]
+        [JsonProperty("cellMetaData")]
         public string? CellMetaData { get; set; }
         [JsonProperty("headers")]
         public List<string>? headers { get; set; }

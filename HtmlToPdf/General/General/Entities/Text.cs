@@ -10,8 +10,8 @@ namespace General.Entities
     public class Text
     {
         [JsonProperty("name")]
-        public string Name { get; set; }
-        [JsonProperty("Value")]
-        public string value { get; set; }
+        public string? Name { get; set; }
+        [JsonProperty("value")]
+        public string? value { get; set; }
     }
 }

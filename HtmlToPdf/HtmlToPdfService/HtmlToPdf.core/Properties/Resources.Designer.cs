@@ -86,5 +86,14 @@ namespace HtmlToPdf.core.Properties {
                 return ResourceManager.GetString("TextPrefix", resourceCulture);
             }
         }
+
+        /// <summary>
+        ///   Looks up a localized string similar to #{image..
+        /// </summary>
+        internal static string ImagePrefix {
+            get {
+                return ResourceManager.GetString("ImagePrefix", resourceCulture);
+            }
+        }
     }
 }

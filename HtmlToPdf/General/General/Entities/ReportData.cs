@@ -15,7 +15,9 @@ namespace General.Entities
         public PageSetup? PageSetup { get; set; }
         [JsonProperty("texts")]
         public List<Text>? Texts { get; set; }
-        [JsonProperty("images")]
+        [JsonProperty("tables")]
         public List<Table>? Tables { get; set; }
+        [JsonProperty("images")]
+        public List<Image>? Images { get; set; }
     }
 }

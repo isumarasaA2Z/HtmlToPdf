@@ -1,6 +1,7 @@
 ﻿using HtmlToPdf.core;
 using HtmlToPdf.core.Helpers;
 using HtmlToPdf.core.Interfaces;
+using HtmlToPdf.core.Services;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace HtmlToPdf.api.Core.DependencyInjections
@@ -12,6 +13,8 @@ namespace HtmlToPdf.api.Core.DependencyInjections
             services.AddSingleton<IHtmlToPdfService, HtmlToPdfService>();
 
             services.AddTransient<ITransformHelper, TransformHelper>();
+
+            services.AddSingleton<ITemplateLoader, TemplateLoader>();
 
             return services;
         }

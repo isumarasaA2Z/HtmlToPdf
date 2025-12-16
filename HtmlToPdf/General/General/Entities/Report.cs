@@ -10,6 +10,7 @@ namespace General.Entities
     {
         string? CustomerId { get; set; }
         public string? RequestId { get; set; }
+        public string? TemplateName { get; set; }
         public ReportData? ReportData { get; set; }
     }
 }

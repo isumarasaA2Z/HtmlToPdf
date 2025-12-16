@@ -126,4 +126,7 @@
   <data name="TablePrefix" xml:space="preserve">
     <value>#{table.</value>
   </data>
+  <data name="ImagePrefix" xml:space="preserve">
+    <value>#{image.</value>
+  </data>
 </root>

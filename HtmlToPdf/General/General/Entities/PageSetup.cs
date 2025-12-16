@@ -10,16 +10,16 @@ namespace General.Entities
     public class PageSetup
     {
         [JsonProperty("size")]
-        public string Size { get; set; }
+        public string? Size { get; set; }
         [JsonProperty("orientation")]
-        public string Orientation { get; set; }
+        public string? Orientation { get; set; }
         [JsonProperty("pageMargin")]
-        public PageMargin PageMargin { get; set; }
+        public PageMargin? PageMargin { get; set; }
         [JsonProperty("footerText")]
-        public HeaderFooterText FooterText { get; set; }
+        public HeaderFooterText? FooterText { get; set; }
         [JsonProperty("headerText")]
-        public HeaderFooterText HeaderText { get; set; }
+        public HeaderFooterText? HeaderText { get; set; }
         [JsonProperty("fontFamily")]
-        public string FontFamily { get; set; }
+        public string? FontFamily { get; set; }
     }
 }
