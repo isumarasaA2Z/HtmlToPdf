@@ -1,9 +1,4 @@
 ﻿using General.Entities;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace HtmlToPdf.core.Interfaces
 {
@@ -11,5 +6,6 @@ namespace HtmlToPdf.core.Interfaces
     {
         Task<ReturnResponse> GetConvertedHtmltoPdf(Report report);
         Task<ReturnResponse> GetConvertedHtml(Report report);
+        Task<string> SaveHtmlToPdfFile(Report report, string? outputFilePath = null);
     }
 }

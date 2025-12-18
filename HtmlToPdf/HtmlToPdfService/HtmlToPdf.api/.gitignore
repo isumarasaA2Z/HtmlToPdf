@@ -1,0 +1,14 @@
+# Chromium browser files (downloaded automatically by PuppeteerSharp)
+chromium/
+
+# Build outputs
+bin/
+obj/
+
+# User-specific files
+*.user
+*.suo
+
+# IDE
+.vs/
+.vscode/
