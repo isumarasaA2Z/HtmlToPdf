@@ -2,9 +2,6 @@ using System.ComponentModel.DataAnnotations;
 
 namespace HtmlToPdf.core.Data.Entities
 {
-    /// <summary>
-    /// Audit log for tracking all system activities
-    /// </summary>
     public class AuditLog
     {
         [Key]
@@ -35,9 +32,6 @@ namespace HtmlToPdf.core.Data.Entities
         [MaxLength(500)]
         public string? Details { get; set; }
 
-        /// <summary>
-        /// JSON of the changes (before/after values)
-        /// </summary>
         public string? Changes { get; set; }
 
         public bool IsSuccess { get; set; } = true;

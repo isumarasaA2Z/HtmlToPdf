@@ -19,7 +19,6 @@ namespace HtmlToPdf.api.Data
         {
             base.OnModelCreating(modelBuilder);
 
-            // Configure PdfGenerationRequest
             modelBuilder.Entity<PdfGenerationRequest>(entity =>
             {
                 entity.ToTable("PdfGenerationRequests");
@@ -33,7 +32,6 @@ namespace HtmlToPdf.api.Data
                     .OnDelete(DeleteBehavior.Cascade);
             });
 
-            // Configure GeneratedPdf
             modelBuilder.Entity<GeneratedPdf>(entity =>
             {
                 entity.ToTable("GeneratedPdfs");
@@ -41,7 +39,6 @@ namespace HtmlToPdf.api.Data
                 entity.HasIndex(e => e.GeneratedAt);
             });
 
-            // Configure AuditLog
             modelBuilder.Entity<AuditLog>(entity =>
             {
                 entity.ToTable("AuditLogs");
@@ -51,7 +48,6 @@ namespace HtmlToPdf.api.Data
                 entity.HasIndex(e => e.UserId);
             });
 
-            // Configure HtmlTemplate
             modelBuilder.Entity<HtmlTemplate>(entity =>
             {
                 entity.ToTable("HtmlTemplates");
@@ -62,7 +58,6 @@ namespace HtmlToPdf.api.Data
 
         public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
         {
-            // Automatically set UpdatedAt for templates
             var entries = ChangeTracker.Entries<HtmlTemplate>()
                 .Where(e => e.State == EntityState.Modified);
 

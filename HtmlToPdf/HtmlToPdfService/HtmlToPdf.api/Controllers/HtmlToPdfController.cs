@@ -105,7 +105,6 @@ namespace HtmlToPdf.api.Controllers
                     });
                 }
 
-                // ✅ SAVE TO DATABASE
                 await SaveSuccessfulRequest(report, operationResult.OutputPdf, operationResult.ConvertedHtml, ipAddress, (int)stopwatch.ElapsedMilliseconds);
 
                 _logger.LogInformation("Successfully converted report {RequestId} to PDF ({Size} bytes, {Ms}ms)",
@@ -199,7 +198,6 @@ namespace HtmlToPdf.api.Controllers
             {
                 await _unitOfWork.BeginTransactionAsync();
 
-                // Save request
                 var pdfRequest = new PdfGenerationRequest
                 {
                     RequestId = report.RequestId ?? Guid.NewGuid().ToString(),
@@ -214,7 +212,6 @@ namespace HtmlToPdf.api.Controllers
                 await _unitOfWork.PdfRequestRepository.AddAsync(pdfRequest);
                 await _unitOfWork.SaveChangesAsync();
 
-                // Save PDF
                 var generatedPdf = new GeneratedPdf
                 {
                     PdfGenerationRequestId = pdfRequest.Id,
@@ -228,7 +225,6 @@ namespace HtmlToPdf.api.Controllers
 
                 await _unitOfWork.PdfRepository.AddAsync(generatedPdf);
 
-                // Log audit
                 await _unitOfWork.AuditLogRepository.LogActionAsync(
                     action: "PDF_GENERATED",
                     entityType: "GeneratedPdf",
@@ -247,7 +243,6 @@ namespace HtmlToPdf.api.Controllers
             {
                 await _unitOfWork.RollbackTransactionAsync();
                 _logger.LogError(ex, "Failed to save PDF to database for request {RequestId}", report.RequestId);
-                // Don't throw - PDF was generated successfully, database save is secondary
             }
         }
 

@@ -4,9 +4,6 @@ using System.Linq.Expressions;
 
 namespace HtmlToPdf.api.Data.Repositories
 {
-    /// <summary>
-    /// Generic repository implementation
-    /// </summary>
     public class Repository<T> : IRepository<T> where T : class
     {
         protected readonly ApplicationDbContext _context;

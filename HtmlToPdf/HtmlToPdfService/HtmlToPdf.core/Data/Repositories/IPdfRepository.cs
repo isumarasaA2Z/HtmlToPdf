@@ -2,9 +2,6 @@ using HtmlToPdf.core.Data.Entities;
 
 namespace HtmlToPdf.core.Data.Repositories
 {
-    /// <summary>
-    /// Repository interface for PDF operations
-    /// </summary>
     public interface IPdfRepository : IRepository<GeneratedPdf>
     {
         Task<GeneratedPdf?> GetByRequestIdAsync(string requestId);

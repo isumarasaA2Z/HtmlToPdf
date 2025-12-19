@@ -15,12 +15,10 @@ namespace HtmlToPdf.api.Core.DependencyInjections
     {
         public static IServiceCollection AddDataServices(this IServiceCollection services, IConfiguration configuration)
         {
-            // Register existing services
             services.AddSingleton<IHtmlToPdfService, HtmlToPdfService>();
             services.AddTransient<ITransformHelper, TransformHelper>();
             services.AddSingleton<ITemplateLoader, TemplateLoader>();
 
-            // Register Database Context
             services.AddDbContext<ApplicationDbContext>(options =>
             {
                 var connectionString = configuration.GetConnectionString("DefaultConnection");
@@ -30,10 +28,8 @@ namespace HtmlToPdf.api.Core.DependencyInjections
                 }
             });
 
-            // Register Unit of Work
             services.AddScoped<IUnitOfWork, UnitOfWork>();
 
-            // Register Repositories
             services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
             services.AddScoped<IPdfRepository, PdfRepository>();
             services.AddScoped<IAuditLogRepository, AuditLogRepository>();

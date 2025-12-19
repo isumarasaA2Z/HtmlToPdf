@@ -2,9 +2,6 @@ using HtmlToPdf.core.Data.Repositories;
 
 namespace HtmlToPdf.core.Data
 {
-    /// <summary>
-    /// Unit of Work pattern for managing transactions across repositories
-    /// </summary>
     public interface IUnitOfWork : IDisposable
     {
         IPdfRepository PdfRepository { get; }

@@ -10,12 +10,10 @@ namespace HtmlToPdf.core.Services
         {
             _templatesPath = templatesPath ?? Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Templates");
 
-            // Create templates directory if it doesn't exist
             if (!Directory.Exists(_templatesPath))
             {
                 Directory.CreateDirectory(_templatesPath);
 
-                // Create default template file
                 var defaultTemplatePath = Path.Combine(_templatesPath, "default.html");
                 if (!File.Exists(defaultTemplatePath))
                 {
@@ -31,7 +29,6 @@ namespace HtmlToPdf.core.Services
                 return GetDefaultTemplate();
             }
 
-            // Ensure .html extension
             if (!templateName.EndsWith(".html", StringComparison.OrdinalIgnoreCase))
             {
                 templateName += ".html";

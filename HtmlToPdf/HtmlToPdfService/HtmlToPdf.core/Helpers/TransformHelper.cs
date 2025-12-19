@@ -106,7 +106,6 @@ namespace HtmlToPdf.core.Helpers
                     continue;
                 }
 
-                // Build image HTML
                 string imageHtml = BuildImageHtml(imageItem);
                 Console.WriteLine($"[DEBUG] Replacing {imageName} with image HTML (length: {imageHtml.Length})");
 
@@ -121,10 +120,8 @@ namespace HtmlToPdf.core.Helpers
         {
             string src;
 
-            // Priority: Base64 > URL
             if (!string.IsNullOrEmpty(imageItem.Base64Data))
             {
-                // Ensure proper base64 format
                 src = imageItem.Base64Data.StartsWith("data:", StringComparison.OrdinalIgnoreCase)
                     ? imageItem.Base64Data
                     : $"data:image/png;base64,{imageItem.Base64Data}";
@@ -135,11 +132,9 @@ namespace HtmlToPdf.core.Helpers
             }
             else
             {
-                // No image source provided
                 return $"<!-- Image '{imageItem.Name}' has no source -->";
             }
 
-            // Build attributes
             var attributes = new List<string>
             {
                 $"src=\"{src}\"",
@@ -173,24 +168,19 @@ namespace HtmlToPdf.core.Helpers
         {
             try
             {
-                // Download Chromium if not already downloaded
                 var browserFetcher = new BrowserFetcher();
                 await browserFetcher.DownloadAsync();
 
-                // Launch the browser
                 await using var browser = await Puppeteer.LaunchAsync(new LaunchOptions
                 {
                     Headless = true,
                     Args = new[] { "--no-sandbox", "--disable-setuid-sandbox" }
                 });
 
-                // Create a new page
                 await using var page = await browser.NewPageAsync();
 
-                // Set the HTML content
                 await page.SetContentAsync(htmlReport);
 
-                // Configure PDF options based on report settings
                 var pdfOptions = new PdfOptions
                 {
                     Format = GetPaperFormat(report.ReportData.PageSetup?.Size),
@@ -202,7 +192,6 @@ namespace HtmlToPdf.core.Helpers
                     FooterTemplate = footer ?? string.Empty
                 };
 
-                // Generate PDF
                 var pdfBytes = await page.PdfDataAsync(pdfOptions);
 
                 return pdfBytes;
@@ -240,7 +229,6 @@ namespace HtmlToPdf.core.Helpers
                 };
             }
 
-            // Use header and footer margins height for top and bottom
             int topMargin = pageMargin.HeaderMargin?.Height ?? 10;
             int bottomMargin = pageMargin.FooterMargin?.Height ?? 10;
             int leftMargin = pageMargin.HeaderMargin?.Left ?? 10;

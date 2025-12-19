@@ -2,9 +2,6 @@ using System.ComponentModel.DataAnnotations;
 
 namespace HtmlToPdf.core.Data.Entities
 {
-    /// <summary>
-    /// Stores HTML templates in database (alternative to file-based templates)
-    /// </summary>
     public class HtmlTemplate
     {
         [Key]
@@ -32,9 +29,6 @@ namespace HtmlToPdf.core.Data.Entities
         [MaxLength(200)]
         public string? UpdatedBy { get; set; }
 
-        /// <summary>
-        /// Version number for template versioning
-        /// </summary>
         public int Version { get; set; } = 1;
     }
 }
